@@ -1,0 +1,31 @@
+# Secretos y entorno
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Compilación y pruebas
+/bin/
+/dist/
+/tmp/
+*.exe
+*.test
+*.out
+coverage.*
+
+# Datos locales de Docker y MongoDB
+/data/
+/mongo-datos/
+*.log
+
+# Editores y sistema
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Go
+go.work
+go.work.sum
