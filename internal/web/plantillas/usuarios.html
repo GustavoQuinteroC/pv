@@ -1,0 +1,49 @@
+{{define "contenido"}}
+<h1>Usuarios</h1>
+
+<form method="post" action="/usuarios" class="tarjeta fila">
+  <label>Nombre <input name="nombre" required></label>
+  <label>Correo <input type="email" name="correo" required></label>
+  <label>Contraseña (mínimo 8 caracteres)
+    <input type="password" name="clave" minlength="8" autocomplete="new-password" required>
+  </label>
+  <label>Rol
+    <select name="rol">
+      <option value="cajero">Cajero</option>
+      <option value="admin">Administrador</option>
+    </select>
+  </label>
+  <button class="primario">Agregar</button>
+</form>
+
+<div class="tabla-contenedor">
+  <table>
+    <thead>
+      <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr>
+    </thead>
+    <tbody>
+      {{range .Usuarios}}
+      <tr>
+        <td>{{.Nombre}}</td>
+        <td>{{.Correo}}</td>
+        <td>{{.Rol}}</td>
+        <td>{{if .Activo}}Activo{{else}}<span class="suave">Inactivo</span>{{end}}</td>
+        <td>
+          {{if .Activo}}
+          <form method="post" action="/usuarios/{{.ID.Hex}}/activo">
+            <input type="hidden" name="activo" value="false">
+            <button>Desactivar</button>
+          </form>
+          {{else}}
+          <form method="post" action="/usuarios/{{.ID.Hex}}/activo">
+            <input type="hidden" name="activo" value="true">
+            <button>Activar</button>
+          </form>
+          {{end}}
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

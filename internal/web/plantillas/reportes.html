@@ -1,0 +1,63 @@
+{{define "contenido"}}
+<h1>Reportes</h1>
+
+<form method="get" action="/reportes" class="fila">
+  <label>Desde <input type="date" name="desde" value="{{.Desde}}"></label>
+  <label>Hasta <input type="date" name="hasta" value="{{.Hasta}}"></label>
+  <button class="primario">Ver</button>
+  <button name="formato" value="csv">Descargar CSV</button>
+</form>
+
+<div class="cifras tarjeta">
+  <div><span class="suave">Ventas</span><strong>{{.Resumen.Cantidad}}</strong></div>
+  <div><span class="suave">Total</span><strong>{{pesos .Resumen.Total}}</strong></div>
+  {{range $forma, $monto := .Resumen.PorForma}}
+  <div><span class="suave">{{$forma}}</span><strong>{{pesos $monto}}</strong></div>
+  {{end}}
+</div>
+
+<section class="tarjeta">
+  <h2>Lo más vendido</h2>
+  <div class="tabla-contenedor">
+    <table>
+      <tbody>
+        {{range .MasVendidos}}
+        <tr><td>{{.Nombre}}</td><td class="dinero">{{pesos .Importe}}</td></tr>
+        {{else}}
+        <tr><td class="suave">Sin ventas en estas fechas.</td></tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="tarjeta">
+  <h2>Ventas</h2>
+  <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr>
+          <th>Folio</th>
+          <th>Fecha</th>
+          <th>Cajero</th>
+          <th>Estado</th>
+          <th class="dinero">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .Ventas}}
+        <tr>
+          <td><a href="/ventas/{{.ID.Hex}}">{{.Folio}}</a></td>
+          <td>{{fecha .Fecha}}</td>
+          <td>{{.CajeroNombre}}</td>
+          <td>{{.Estado}}</td>
+          <td class="dinero">{{pesos .Total}}</td>
+        </tr>
+        {{else}}
+        <tr><td colspan="5" class="suave">Sin ventas en estas fechas.</td></tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</section>
+{{end}}

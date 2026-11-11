@@ -1,0 +1,15 @@
+{{define "contenido"}}
+<h1>Ajustes</h1>
+
+<form method="post" action="/ajustes" class="formulario tarjeta">
+  <label>Nombre del negocio
+    <input name="nombre" value="{{.Negocio.Nombre}}" required>
+  </label>
+
+  <label>Mensaje al final del ticket
+    <input name="mensaje" value="{{.Negocio.Mensaje}}">
+  </label>
+
+  <button class="primario">Guardar</button>
+</form>
+{{end}}

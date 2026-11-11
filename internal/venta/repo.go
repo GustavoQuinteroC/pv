@@ -92,9 +92,8 @@ func (r *Repo) Cancelar(ctx context.Context, id, turnoAbierto bson.ObjectID, mot
 }
 
 type MasVendido struct {
-	Nombre   string `bson:"_id"`
-	Cantidad int64  `bson:"cantidad"`
-	Importe  int64  `bson:"importe"`
+	Nombre  string `bson:"_id"`
+	Importe int64  `bson:"importe"`
 }
 
 // MasVendidos agrupa los renglones de las ventas activas por producto.
@@ -103,9 +102,8 @@ func (r *Repo) MasVendidos(ctx context.Context, desde, hasta time.Time) ([]MasVe
 		{"$match": bson.M{"estado": Activa, "fecha": bson.M{"$gte": desde, "$lt": hasta}}},
 		{"$unwind": "$renglones"},
 		{"$group": bson.M{
-			"_id":      "$renglones.nombre",
-			"cantidad": bson.M{"$sum": "$renglones.cantidad"},
-			"importe":  bson.M{"$sum": "$renglones.importe"},
+			"_id":     "$renglones.nombre",
+			"importe": bson.M{"$sum": "$renglones.importe"},
 		}},
 		{"$sort": bson.M{"importe": -1}},
 		{"$limit": 10},

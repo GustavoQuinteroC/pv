@@ -83,6 +83,15 @@ func (a *App) Rutas() http.Handler {
 	mux.HandleFunc("GET /ventas/{id}", a.con(cualquiera, a.verTicket))
 	mux.HandleFunc("POST /ventas/{id}/cancelar", a.con(usuario.Admin, a.cancelarVenta))
 
+	mux.HandleFunc("GET /reportes", a.con(usuario.Admin, a.reportes))
+
+	mux.HandleFunc("GET /usuarios", a.con(usuario.Admin, a.listaUsuarios))
+	mux.HandleFunc("POST /usuarios", a.con(usuario.Admin, a.crearUsuario))
+	mux.HandleFunc("POST /usuarios/{id}/activo", a.con(usuario.Admin, a.cambiarActivo))
+
+	mux.HandleFunc("GET /ajustes", a.con(usuario.Admin, a.formularioAjustes))
+	mux.HandleFunc("POST /ajustes", a.con(usuario.Admin, a.guardarAjustes))
+
 	// Rechaza los envíos que vienen de otro sitio (protección contra CSRF).
 	return cabeceras(http.NewCrossOriginProtection().Handler(mux))
 }
