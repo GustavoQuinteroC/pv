@@ -1,0 +1,152 @@
+:root {
+  --fondo: #f4f6f8;
+  --superficie: #ffffff;
+  --texto: #1c2430;
+  --suave: #5f6b7a;
+  --borde: #d9dee5;
+  --verde: #0f7b5f;
+  --verde-oscuro: #0a5c47;
+  --rojo: #b3261e;
+  --ambar: #8a5a00;
+  --radio: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font: 16px/1.4 system-ui, sans-serif;
+}
+
+main { padding: 1rem; max-width: 1200px; margin: 0 auto; }
+h1, h2 { margin: 0 0 .75rem; }
+a { color: var(--verde); }
+
+/* Barra superior */
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem 1.5rem;
+  align-items: center;
+  padding: .6rem 1rem;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+.barra nav { display: flex; flex-wrap: wrap; gap: 1rem; flex: 1; }
+.barra form { display: flex; gap: .75rem; align-items: center; }
+
+/* Formularios y botones */
+label { display: grid; gap: .25rem; font-weight: 600; }
+input, select {
+  width: 100%;
+  padding: .6rem .7rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  font: inherit;
+  background: var(--superficie);
+}
+input[type="checkbox"] { width: auto; }
+
+button {
+  padding: .6rem 1rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  font: inherit;
+  cursor: pointer;
+}
+a.boton {
+  display: inline-block;
+  padding: .6rem 1rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+  text-decoration: none;
+}
+a.boton.primario { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 700; }
+button.primario { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 700; }
+button.primario:hover { background: var(--verde-oscuro); }
+button.peligro { color: var(--rojo); border-color: var(--rojo); }
+
+.formulario { display: grid; gap: .9rem; max-width: 520px; }
+.casilla { display: flex; gap: .5rem; align-items: center; font-weight: 400; }
+.fila { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; margin-bottom: 1rem; }
+.fila > label { flex: 1; min-width: 150px; }
+
+/* Tarjetas, avisos y tablas */
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+.angosta { display: grid; gap: .9rem; max-width: 380px; margin: 10vh auto 0; }
+
+.aviso {
+  padding: .7rem 1rem;
+  border-radius: var(--radio);
+  background: #fdeceb;
+  color: var(--rojo);
+  font-weight: 600;
+}
+
+table { width: 100%; border-collapse: collapse; background: var(--superficie); }
+th, td { padding: .55rem .7rem; text-align: left; border-bottom: 1px solid var(--borde); }
+td.dinero, th.dinero { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-contenedor { overflow-x: auto; border: 1px solid var(--borde); border-radius: var(--radio); }
+
+.cifras { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+.cifras > div { flex: 1; min-width: 150px; }
+.cifras strong { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.suave { color: var(--suave); }
+.cuadra { color: var(--verde); }
+.sobra { color: var(--ambar); }
+.falta { color: var(--rojo); }
+
+/* Pantalla de caja */
+.caja { display: grid; grid-template-columns: 1fr 380px; gap: 1rem; align-items: start; }
+.mosaicos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: .6rem; margin-top: .75rem; }
+.mosaico { min-height: 76px; text-align: left; display: grid; gap: .2rem; align-content: space-between; }
+.mosaico small { color: var(--suave); }
+
+.ticket-actual { position: sticky; top: 1rem; }
+.renglones { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .6rem; }
+.renglon { display: grid; grid-template-columns: 1fr auto; gap: .35rem .5rem; padding-bottom: .6rem; border-bottom: 1px solid var(--borde); }
+.renglon .nombre { font-weight: 600; }
+.renglon .medidas { grid-column: 1 / -1; display: flex; gap: .4rem; align-items: center; }
+.renglon input { width: 6.5rem; padding: .35rem .5rem; }
+.total { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.1rem; margin: .75rem 0; }
+.total strong { font-size: 2.2rem; font-variant-numeric: tabular-nums; }
+.acciones { display: grid; grid-template-columns: 1fr 2fr; gap: .6rem; }
+.acciones button { min-height: 52px; }
+.espera { margin-top: 1rem; display: grid; gap: .4rem; }
+
+dialog { border: 0; border-radius: var(--radio); padding: 1.25rem; width: min(420px, 94vw); }
+dialog::backdrop { background: rgba(0, 0, 0, .45); }
+dialog .formulario { max-width: none; }
+.billetes { display: flex; flex-wrap: wrap; gap: .4rem; }
+.cambio { font-size: 1.8rem; font-weight: 700; }
+
+/* Ticket impreso: se ajusta al ancho del papel (58 mm, 80 mm o carta) */
+.ticket { max-width: 80mm; margin: 0 auto; font: 13px/1.35 ui-monospace, monospace; background: var(--superficie); padding: 1rem; }
+.ticket h1 { font-size: 1.1rem; text-align: center; }
+.ticket table { font: inherit; }
+.ticket th, .ticket td { padding: .15rem 0; border: 0; }
+.ticket hr { border: 0; border-top: 1px dashed var(--texto); }
+.ticket .centro { text-align: center; }
+
+@media (max-width: 800px) {
+  .caja { grid-template-columns: 1fr; }
+  .ticket-actual { position: static; }
+}
+
+@media print {
+  body { background: #fff; }
+  .barra, .no-imprimir { display: none; }
+  main { padding: 0; }
+  .ticket { max-width: none; padding: 0; }
+}

@@ -1,0 +1,37 @@
+{{define "contenido"}}
+<h1>{{if .Producto.ID.IsZero}}Nuevo producto{{else}}Editar producto{{end}}</h1>
+
+<form method="post" action="{{.Accion}}" class="formulario tarjeta">
+  <label>Nombre
+    <input name="nombre" value="{{.Producto.Nombre}}" required autofocus>
+  </label>
+
+  <label>Código de barras (opcional)
+    <input name="codigo" value="{{.Producto.Codigo}}" inputmode="numeric">
+  </label>
+
+  <label>Precio por unidad
+    <input name="precio" value="{{if .Producto.Precio}}{{decimal .Producto.Precio}}{{end}}" inputmode="decimal" required>
+  </label>
+
+  <label>Se vende por
+    <select name="unidad">
+      {{range .Unidades}}
+      <option value="{{.}}" {{if eq . $.Producto.Unidad}}selected{{end}}>{{.}}</option>
+      {{end}}
+    </select>
+  </label>
+
+  <label class="casilla">
+    <input type="checkbox" name="favorito" {{if .Producto.Favorito}}checked{{end}}>
+    Mostrar entre los favoritos de la caja
+  </label>
+
+  <label class="casilla">
+    <input type="checkbox" name="activo" {{if .Producto.Activo}}checked{{end}}>
+    Activo (si se desmarca, ya no se puede vender)
+  </label>
+
+  <button class="primario">Guardar</button>
+</form>
+{{end}}

@@ -1,0 +1,15 @@
+{{define "contenido"}}
+<form method="post" action="/login" class="tarjeta angosta">
+  <h1>{{.Negocio.Nombre}}</h1>
+
+  <label>Correo
+    <input type="email" name="correo" autocomplete="username" required autofocus>
+  </label>
+
+  <label>Contraseña
+    <input type="password" name="clave" autocomplete="current-password" required>
+  </label>
+
+  <button class="primario">Entrar</button>
+</form>
+{{end}}

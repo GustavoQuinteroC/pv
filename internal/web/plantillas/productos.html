@@ -1,0 +1,33 @@
+{{define "contenido"}}
+<div class="fila">
+  <h1>Productos</h1>
+  <a class="boton primario" href="/productos/nuevo">Nuevo producto</a>
+</div>
+
+<div class="tabla-contenedor">
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Código</th>
+        <th class="dinero">Precio</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Productos}}
+      <tr>
+        <td>{{.Nombre}}{{if .Favorito}} ★{{end}}</td>
+        <td>{{.Codigo}}</td>
+        <td class="dinero">{{pesos .Precio}} / {{.Unidad}}</td>
+        <td>{{if .Activo}}Activo{{else}}<span class="suave">Inactivo</span>{{end}}</td>
+        <td><a href="/productos/{{.ID.Hex}}">Editar</a></td>
+      </tr>
+      {{else}}
+      <tr><td colspan="5" class="suave">Todavía no hay productos.</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

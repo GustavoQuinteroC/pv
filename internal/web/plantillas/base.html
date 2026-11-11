@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Titulo}} · {{.Negocio.Nombre}}</title>
+  <link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body{{if .Imprimir}} data-imprimir{{end}}>
+  {{if and .Usuario (not .SinMenu)}}
+  <header class="barra">
+    <strong>{{.Negocio.Nombre}}</strong>
+    <nav>
+      <a href="/caja">Caja</a>
+      <a href="/turno">Turno</a>
+      {{if eq .Usuario.Rol "admin"}}
+      <a href="/productos">Productos</a>
+      <a href="/reportes">Reportes</a>
+      <a href="/turnos">Cortes</a>
+      <a href="/usuarios">Usuarios</a>
+      <a href="/ajustes">Ajustes</a>
+      {{end}}
+    </nav>
+    <form method="post" action="/salir">
+      <span>{{.Usuario.Nombre}}</span>
+      <button>Salir</button>
+    </form>
+  </header>
+  {{end}}
+
+  <main>
+    {{if .Error}}<p class="aviso" role="alert">{{.Error}}</p>{{end}}
+    {{block "contenido" .}}{{end}}
+  </main>
+
+  <script src="/static/comun.js"></script>
+  {{block "scripts" .}}{{end}}
+</body>
+</html>
