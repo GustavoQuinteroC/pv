@@ -1,0 +1,30 @@
+{{define "contenido"}}
+<h1>Cortes de caja</h1>
+
+<div class="tabla-contenedor">
+  <table>
+    <thead>
+      <tr>
+        <th>Abierto</th>
+        <th>Cajero</th>
+        <th>Estado</th>
+        <th class="dinero">Diferencia</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Turnos}}
+      <tr>
+        <td>{{fecha .Abierto}}</td>
+        <td>{{.CajeroNombre}}</td>
+        <td>{{.Estado}}</td>
+        <td class="dinero">{{if eq .Estado "cerrado"}}{{pesos .Diferencia}}{{end}}</td>
+        <td><a href="/turnos/{{.ID.Hex}}">Ver</a></td>
+      </tr>
+      {{else}}
+      <tr><td colspan="5" class="suave">Todavía no hay turnos.</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}

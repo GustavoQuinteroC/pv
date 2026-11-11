@@ -1,0 +1,70 @@
+{{define "contenido"}}
+<section class="caja">
+  <div>
+    <input id="buscar" type="search" placeholder="Escanea el código o escribe el nombre" autocomplete="off" autofocus>
+    <div id="mosaicos" class="mosaicos"></div>
+  </div>
+
+  <aside class="ticket-actual tarjeta">
+    <ul id="renglones" class="renglones"></ul>
+
+    <label>Descuento
+      <input id="descuento" inputmode="decimal" placeholder="0.00">
+    </label>
+
+    <p class="total"><span>Total</span> <strong id="total">$0.00</strong></p>
+
+    <div class="acciones">
+      <button id="esperar" type="button">En espera</button>
+      <button id="cobrar" type="button" class="primario">Cobrar</button>
+    </div>
+
+    <div id="espera" class="espera"></div>
+  </aside>
+</section>
+
+<template id="plantilla-renglon">
+  <li class="renglon">
+    <span class="nombre"></span>
+    <strong class="importe"></strong>
+    <div class="medidas">
+      <input class="cantidad" inputmode="decimal" aria-label="Cantidad">
+      <span class="unidad"></span>
+      <input class="monto" inputmode="decimal" placeholder="o monto $" aria-label="Importe en pesos">
+      <button type="button" class="quitar">Quitar</button>
+    </div>
+  </li>
+</template>
+
+<dialog id="cobro">
+  <form id="formulario-cobro" class="formulario">
+    <h2>Cobrar</h2>
+    <p class="total"><span>Total</span> <strong id="cobro-total"></strong></p>
+
+    <label>Efectivo <input id="pago-efectivo" inputmode="decimal"></label>
+    <div class="billetes">
+      <button type="button" data-billete="exacto">Exacto</button>
+      <button type="button" data-billete="50">$50</button>
+      <button type="button" data-billete="100">$100</button>
+      <button type="button" data-billete="200">$200</button>
+      <button type="button" data-billete="500">$500</button>
+    </div>
+
+    <label>Tarjeta <input id="pago-tarjeta" inputmode="decimal"></label>
+    <label>Transferencia <input id="pago-transferencia" inputmode="decimal"></label>
+
+    <p id="cambio" class="cambio"></p>
+    <p id="cobro-error" class="aviso" role="alert" hidden></p>
+
+    <div class="acciones">
+      <button type="button" id="volver">Volver</button>
+      <button id="confirmar" class="primario">Confirmar cobro</button>
+    </div>
+  </form>
+</dialog>
+{{end}}
+
+{{define "scripts"}}
+<script id="productos" type="application/json">{{.Productos}}</script>
+<script src="/static/caja.js"></script>
+{{end}}

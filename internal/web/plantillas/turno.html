@@ -1,0 +1,52 @@
+{{define "contenido"}}
+<h1>Turno de {{.Turno.CajeroNombre}}</h1>
+<p class="suave">Abierto el {{fecha .Turno.Abierto}} con un fondo de {{pesos .Turno.Fondo}}.</p>
+
+<section class="tarjeta">
+  <h2>Entradas y retiros de efectivo</h2>
+
+  <form method="post" action="/turno/movimientos" class="fila">
+    <label>Tipo
+      <select name="tipo">
+        <option value="entrada">Entrada</option>
+        <option value="retiro">Retiro</option>
+      </select>
+    </label>
+    <label>Monto <input name="monto" inputmode="decimal" required></label>
+    <label>Motivo <input name="motivo" required></label>
+    <button class="primario">Registrar</button>
+  </form>
+
+  {{if .Movimientos}}
+  <div class="tabla-contenedor">
+    <table>
+      <thead>
+        <tr><th>Hora</th><th>Tipo</th><th class="dinero">Monto</th><th>Motivo</th></tr>
+      </thead>
+      <tbody>
+        {{range .Movimientos}}
+        <tr>
+          <td>{{fecha .Fecha}}</td>
+          <td>{{.Tipo}}</td>
+          <td class="dinero">{{pesos .Monto}}</td>
+          <td>{{.Motivo}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+</section>
+
+<section class="tarjeta">
+  <h2>Cerrar turno</h2>
+  <p class="suave">Cuenta el efectivo del cajón y escribe el total. El sistema no te dice cuánto debería haber.</p>
+
+  <form method="post" action="/turno/cerrar" class="fila" data-confirmar="¿Cerrar el turno? No se podrá vender hasta abrir otro.">
+    <label>Efectivo contado
+      <input name="contado" inputmode="decimal" required>
+    </label>
+    <button class="peligro">Cerrar turno</button>
+  </form>
+</section>
+{{end}}

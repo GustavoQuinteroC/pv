@@ -1,0 +1,55 @@
+{{define "contenido"}}
+<article class="ticket">
+  <h1>{{.Negocio.Nombre}}</h1>
+  <p class="centro">
+    Folio {{.Venta.Folio}} · {{fecha .Venta.Fecha}}<br>
+    Atendió: {{.Venta.CajeroNombre}}
+  </p>
+
+  {{if eq .Venta.Estado "cancelada"}}
+  <p class="centro"><strong>VENTA CANCELADA</strong><br>{{.Venta.Motivo}}</p>
+  {{end}}
+
+  <hr>
+  <table>
+    {{range .Venta.Renglones}}
+    <tr><td colspan="2">{{.Nombre}}</td></tr>
+    <tr>
+      <td>{{cantidad .Cantidad .Unidad}} {{.Unidad}} × {{pesos .Precio}}</td>
+      <td class="dinero">{{pesos .Importe}}</td>
+    </tr>
+    {{end}}
+  </table>
+
+  <hr>
+  <table>
+    {{if .Venta.Descuento}}
+    <tr><td>Descuento</td><td class="dinero">-{{pesos .Venta.Descuento}}</td></tr>
+    {{end}}
+    <tr><th>Total</th><th class="dinero">{{pesos .Venta.Total}}</th></tr>
+    {{range .Venta.Pagos}}
+    <tr><td>Pago en {{.Forma}}</td><td class="dinero">{{pesos .Monto}}</td></tr>
+    {{end}}
+    {{if .Venta.Cambio}}
+    <tr><td>Cambio</td><td class="dinero">{{pesos .Venta.Cambio}}</td></tr>
+    {{end}}
+  </table>
+
+  <hr>
+  <p class="centro">{{.Negocio.Mensaje}}</p>
+</article>
+
+<div class="no-imprimir">
+  <p class="fila">
+    <a class="boton primario" href="/caja">Nueva venta</a>
+    <button type="button" data-imprimir-ahora>Imprimir</button>
+  </p>
+
+  {{if and (eq .Usuario.Rol "admin") (eq .Venta.Estado "activa")}}
+  <form method="post" action="/ventas/{{.Venta.ID.Hex}}/cancelar" class="fila" data-confirmar="¿Cancelar esta venta?">
+    <label>Motivo de la cancelación <input name="motivo" required></label>
+    <button class="peligro">Cancelar venta</button>
+  </form>
+  {{end}}
+</div>
+{{end}}

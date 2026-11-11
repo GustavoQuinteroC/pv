@@ -22,6 +22,7 @@ const (
 )
 
 var (
+	ErrSinTurno     = aviso.Nuevo("Abre tu turno en la caja antes de vender.")
 	ErrTurnoAbierto = aviso.Nuevo("Ya hay un turno abierto en la caja.")
 	ErrFondo        = aviso.Nuevo("El fondo no puede ser negativo.")
 	ErrMovimiento   = aviso.Nuevo("Elige entrada o retiro, un monto mayor a cero y escribe el motivo.")

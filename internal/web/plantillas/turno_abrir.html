@@ -1,0 +1,21 @@
+{{define "contenido"}}
+{{if .Turno}}
+<section class="tarjeta">
+  <h1>La caja está en uso</h1>
+  <p>{{.Turno.CajeroNombre}} abrió el turno el {{fecha .Turno.Abierto}}.</p>
+  <p class="suave">Solo se puede vender desde el turno propio. Hasta que esa persona cierre, no se abre otro.</p>
+  <a class="boton" href="/turno">Ver el turno</a>
+</section>
+{{else}}
+<form method="post" action="/turno/abrir" class="formulario tarjeta">
+  <h1>Abrir turno</h1>
+  <p class="suave">Cuenta el efectivo con el que empieza la caja.</p>
+
+  <label>Fondo de caja
+    <input name="fondo" inputmode="decimal" placeholder="0.00" autofocus>
+  </label>
+
+  <button class="primario">Abrir turno</button>
+</form>
+{{end}}
+{{end}}
