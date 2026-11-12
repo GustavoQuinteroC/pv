@@ -1,7 +1,7 @@
 // Archivo: turno.go
-// Qué hace: pantallas del turno de caja. Abrir turno con fondo, ver el turno
+// Qué hace: endpoints del turno de caja. Abrir turno con fondo, ver el turno
 // en curso, registrar entradas y retiros de efectivo, hacer el corte ciego al
-// cerrar, y ver el historial de cortes y el detalle de cada uno.
+// cerrar, y consultar el historial de cortes.
 
 package web
 
@@ -14,20 +14,41 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-// abrirTurno abre el turno de la persona con el fondo capturado.
-func (a *App) abrirTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
-	// Convierte el fondo escrito ("200") a centavos.
-	fondo, err := aCentavos(r.FormValue("fondo"))
-	// Solo intenta abrir si el fondo se entendió bien.
-	if err == nil {
-		err = a.Caja.Abrir(r.Context(), u.ID, u.Nombre, fondo)
-	}
-
+// caja devuelve lo que necesita la pantalla de venta: el turno abierto (si hay),
+// si es de esta persona y, en ese caso, los productos activos.
+func (a *App) caja(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
+	turno, err := a.Caja.TurnoAbierto(r.Context())
 	if err != nil {
-		a.volver(w, r, "/caja", err)
+		a.fallo(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/caja", http.StatusSeeOther)
+
+	respuesta := map[string]any{"turno": turno, "propio": turno != nil && turno.Cajero == u.ID}
+	if respuesta["propio"] == true {
+		productos, err := a.Productos.Listar(r.Context(), true)
+		if err != nil {
+			a.fallo(w, r, err)
+			return
+		}
+		respuesta["productos"] = productos
+	}
+	responder(w, http.StatusOK, respuesta)
+}
+
+// abrirTurno abre el turno de la persona con el fondo indicado (centavos).
+func (a *App) abrirTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
+	var datos struct {
+		Fondo int64 `json:"fondo"`
+	}
+	if !a.leer(w, r, &datos) {
+		return
+	}
+
+	if err := a.Caja.Abrir(r.Context(), u.ID, u.Nombre, datos.Fondo); err != nil {
+		a.fallo(w, r, err)
+		return
+	}
+	sinContenido(w)
 }
 
 // turnoDeLaPersona devuelve el turno abierto si esta persona puede operarlo.
@@ -38,24 +59,21 @@ func (a *App) turnoDeLaPersona(w http.ResponseWriter, r *http.Request, u *usuari
 		a.fallo(w, r, err)
 		return nil
 	}
-
-	// Sin turno abierto, manda a la caja para que lo abra.
 	if turno == nil {
-		http.Redirect(w, r, "/caja", http.StatusSeeOther)
+		a.fallo(w, r, caja.ErrSinTurno)
 		return nil
 	}
 	// Un turno solo lo opera quien lo abrió (o la administración).
 	if turno.Cajero != u.ID && u.Rol != usuario.Admin {
-		http.Error(w, "Este turno es de otra persona.", http.StatusForbidden)
+		responder(w, http.StatusForbidden, map[string]string{"error": "Este turno es de otra persona."})
 		return nil
 	}
 	return turno
 }
 
-// verTurno muestra el turno en curso con sus movimientos y el formulario de cierre.
+// verTurno devuelve el turno en curso con sus movimientos de efectivo.
 func (a *App) verTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
 	turno := a.turnoDeLaPersona(w, r, u)
-	// nil = ya se respondió al navegador, no hay nada más que hacer.
 	if turno == nil {
 		return
 	}
@@ -65,8 +83,7 @@ func (a *App) verTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usuari
 		a.fallo(w, r, err)
 		return
 	}
-
-	a.mostrar(w, r, "turno", u, vista{"Titulo": "Turno", "Turno": turno, "Movimientos": movimientos})
+	responder(w, http.StatusOK, map[string]any{"turno": turno, "movimientos": movimientos})
 }
 
 // registrarMovimiento guarda una entrada o un retiro de efectivo.
@@ -76,16 +93,20 @@ func (a *App) registrarMovimiento(w http.ResponseWriter, r *http.Request, u *usu
 		return
 	}
 
-	monto, err := aCentavos(r.FormValue("monto"))
-	if err == nil {
-		err = a.Caja.Registrar(r.Context(), turno.ID, r.FormValue("tipo"), monto, r.FormValue("motivo"))
+	var datos struct {
+		Tipo   string `json:"tipo"`
+		Monto  int64  `json:"monto"`
+		Motivo string `json:"motivo"`
 	}
-
-	if err != nil {
-		a.volver(w, r, "/turno", err)
+	if !a.leer(w, r, &datos) {
 		return
 	}
-	http.Redirect(w, r, "/turno", http.StatusSeeOther)
+
+	if err := a.Caja.Registrar(r.Context(), turno.ID, datos.Tipo, datos.Monto, datos.Motivo); err != nil {
+		a.fallo(w, r, err)
+		return
+	}
+	sinContenido(w)
 }
 
 // cerrarTurno es el corte ciego: la persona cuenta el efectivo sin ver cuánto debería haber.
@@ -95,10 +116,10 @@ func (a *App) cerrarTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usu
 		return
 	}
 
-	// Lo que la persona contó en el cajón.
-	contado, err := aCentavos(r.FormValue("contado"))
-	if err != nil {
-		a.volver(w, r, "/turno", err)
+	var datos struct {
+		Contado int64 `json:"contado"`
+	}
+	if !a.leer(w, r, &datos) {
 		return
 	}
 
@@ -116,27 +137,25 @@ func (a *App) cerrarTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usu
 
 	// Calcula cuánto debía haber y cierra el turno guardando ambos números.
 	esperado := caja.Esperado(turno.Fondo, ventas, movimientos)
-	if err := a.Caja.Cerrar(r.Context(), turno.ID, contado, esperado); err != nil {
-		a.volver(w, r, "/turno", err)
+	if err := a.Caja.Cerrar(r.Context(), turno.ID, datos.Contado, esperado); err != nil {
+		a.fallo(w, r, err)
 		return
 	}
-	// Muestra el resultado del corte.
-	http.Redirect(w, r, "/turnos/"+turno.ID.Hex(), http.StatusSeeOther)
+	responder(w, http.StatusOK, map[string]string{"id": turno.ID.Hex()})
 }
 
-// listaTurnos muestra todos los cortes (solo administración).
-func (a *App) listaTurnos(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
+// listaTurnos devuelve todos los cortes (solo administración).
+func (a *App) listaTurnos(w http.ResponseWriter, r *http.Request, _ *usuario.Usuario) {
 	turnos, err := a.Caja.Listar(r.Context())
 	if err != nil {
 		a.fallo(w, r, err)
 		return
 	}
-	a.mostrar(w, r, "turnos", u, vista{"Titulo": "Cortes", "Turnos": turnos})
+	responder(w, http.StatusOK, turnos)
 }
 
-// detalleTurno muestra el corte: lo vendido, los movimientos y la diferencia.
+// detalleTurno devuelve el corte: lo vendido, los movimientos y la diferencia.
 func (a *App) detalleTurno(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
-	// Lee el id de la URL.
 	id, err := bson.ObjectIDFromHex(r.PathValue("id"))
 	if err != nil {
 		http.NotFound(w, r)
@@ -150,7 +169,7 @@ func (a *App) detalleTurno(w http.ResponseWriter, r *http.Request, u *usuario.Us
 	}
 	// Un cajero solo puede ver sus propios cortes.
 	if turno.Cajero != u.ID && u.Rol != usuario.Admin {
-		http.Error(w, "Este turno es de otra persona.", http.StatusForbidden)
+		responder(w, http.StatusForbidden, map[string]string{"error": "Este turno es de otra persona."})
 		return
 	}
 
@@ -165,23 +184,10 @@ func (a *App) detalleTurno(w http.ResponseWriter, r *http.Request, u *usuario.Us
 		return
 	}
 
-	a.mostrar(w, r, "turno_detalle", u, vista{
-		"Titulo":      "Corte",
-		"Turno":       turno,
-		"Resumen":     venta.Resumir(ventas),
-		"Movimientos": movimientos,
-		// Clase de color para la diferencia (verde, rojo…).
-		"Clase": claseDeDiferencia(turno.Diferencia()),
+	responder(w, http.StatusOK, map[string]any{
+		"turno":       turno,
+		"diferencia":  turno.Diferencia(),
+		"resumen":     venta.Resumir(ventas),
+		"movimientos": movimientos,
 	})
-}
-
-// claseDeDiferencia traduce la diferencia a un nombre de clase CSS para pintarla.
-func claseDeDiferencia(diferencia int64) string {
-	switch {
-	case diferencia > 0:
-		return "sobra"
-	case diferencia < 0:
-		return "falta"
-	}
-	return "cuadra"
 }

@@ -58,17 +58,17 @@ var (
 // cambiar el catálogo después no altera las ventas pasadas.
 type Renglon struct {
 	// Qué producto era (su id).
-	Producto bson.ObjectID `bson:"producto"`
+	Producto bson.ObjectID `bson:"producto" json:"producto"`
 	// Nombre que tenía en ese momento.
-	Nombre string `bson:"nombre"`
+	Nombre string `bson:"nombre" json:"nombre"`
 	// Unidad en que se vendió.
-	Unidad string `bson:"unidad"`
+	Unidad string `bson:"unidad" json:"unidad"`
 	// Precio por unidad en ese momento (centavos).
-	Precio int64 `bson:"precio"`
+	Precio int64 `bson:"precio" json:"precio"`
 	// Cantidad vendida en milésimas.
-	Cantidad int64 `bson:"cantidad"`
+	Cantidad int64 `bson:"cantidad" json:"cantidad"`
 	// Lo que costó esta línea (centavos).
-	Importe int64 `bson:"importe"`
+	Importe int64 `bson:"importe" json:"importe"`
 }
 
 // Pago es una parte de lo que pagó el cliente (puede pagar con varias formas a la vez).
@@ -82,33 +82,33 @@ type Pago struct {
 // Venta es el ticket completo: se guarda como un solo documento, con renglones y pagos adentro.
 type Venta struct {
 	// Identificador único.
-	ID bson.ObjectID `bson:"_id,omitempty"`
+	ID bson.ObjectID `bson:"_id,omitempty" json:"id"`
 	// Número de ticket (1, 2, 3...).
-	Folio int64 `bson:"folio"`
+	Folio int64 `bson:"folio" json:"folio"`
 	// Identificador de esta venta, para que un doble clic no cobre dos veces.
-	Token string `bson:"token"`
+	Token string `bson:"token" json:"-"`
 	// A qué turno pertenece.
-	Turno bson.ObjectID `bson:"turno"`
+	Turno bson.ObjectID `bson:"turno" json:"turno"`
 	// Quién cobró (id).
-	Cajero bson.ObjectID `bson:"cajero"`
+	Cajero bson.ObjectID `bson:"cajero" json:"cajero"`
 	// Quién cobró (nombre, guardado tal cual en ese momento).
-	CajeroNombre string `bson:"cajero_nombre"`
+	CajeroNombre string `bson:"cajero_nombre" json:"cajero_nombre"`
 	// Las líneas de la venta.
-	Renglones []Renglon `bson:"renglones"`
+	Renglones []Renglon `bson:"renglones" json:"renglones"`
 	// Descuento aplicado (centavos).
-	Descuento int64 `bson:"descuento"`
+	Descuento int64 `bson:"descuento" json:"descuento"`
 	// Total a pagar (centavos).
-	Total int64 `bson:"total"`
+	Total int64 `bson:"total" json:"total"`
 	// Cómo pagó el cliente.
-	Pagos []Pago `bson:"pagos"`
+	Pagos []Pago `bson:"pagos" json:"pagos"`
 	// Cambio que se le regresó (centavos).
-	Cambio int64 `bson:"cambio"`
+	Cambio int64 `bson:"cambio" json:"cambio"`
 	// "activa" o "cancelada".
-	Estado string `bson:"estado"`
+	Estado string `bson:"estado" json:"estado"`
 	// Por qué se canceló (solo si se canceló).
-	Motivo string `bson:"motivo_cancelacion,omitempty"`
+	Motivo string `bson:"motivo_cancelacion,omitempty" json:"motivo_cancelacion"`
 	// Cuándo se hizo.
-	Fecha time.Time `bson:"fecha"`
+	Fecha time.Time `bson:"fecha" json:"fecha"`
 }
 
 // Linea es lo que manda la pantalla de caja por cada producto.
@@ -275,11 +275,11 @@ func calcularCambio(total int64, pagos []Pago) (int64, error) {
 // Resumen son las cifras de un grupo de ventas.
 type Resumen struct {
 	// Cuántas ventas activas hay.
-	Cantidad int
+	Cantidad int `json:"cantidad"`
 	// Suma de sus totales (centavos).
-	Total int64
+	Total int64 `json:"total"`
 	// Cuánto entró por cada forma de pago (centavos).
-	PorForma map[string]int64
+	PorForma map[string]int64 `json:"porForma"`
 }
 
 // Resumir suma las ventas activas. Lo cobrado en efectivo ya va sin el cambio.

@@ -29,3 +29,7 @@ Thumbs.db
 # Go
 go.work
 go.work.sum
+
+# Interfaz React compilada (la genera `npm run build`; solo se versiona .gitkeep)
+/internal/web/dist/*
+!/internal/web/dist/.gitkeep

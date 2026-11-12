@@ -1,0 +1,35 @@
+/*
+  Archivo: index.css
+  Qué hace: carga Tailwind y define el tema de TailAdmin (letra Outfit, color de
+  marca azul, sombras suaves). Todo el diseño del sistema sale de estas variables
+  y de las clases de Tailwind escritas en los componentes.
+*/
+@import "tailwindcss";
+@import "@fontsource-variable/outfit";
+
+@theme {
+  --font-outfit: "Outfit Variable", sans-serif;
+
+  --color-brand-50: #ecf3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #c2d6ff;
+  --color-brand-300: #9cb9ff;
+  --color-brand-400: #7592ff;
+  --color-brand-500: #465fff;
+  --color-brand-600: #3641f5;
+  --color-brand-700: #2a31d8;
+
+  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  --shadow-theme-sm: 0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  --shadow-theme-lg: 0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 font-outfit text-gray-800;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+}

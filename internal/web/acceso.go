@@ -1,5 +1,5 @@
 // Archivo: acceso.go
-// Qué hace: pantallas de entrada y salida. Muestra el formulario de login,
+// Qué hace: sesión de la persona. Dice quién es (y los datos del negocio),
 // valida correo y contraseña, crea la cookie de sesión y la borra al salir.
 
 package web
@@ -11,19 +11,28 @@ import (
 	"github.com/GustavoQuinteroC/pv/internal/usuario"
 )
 
-// formularioLogin muestra la pantalla para escribir correo y contraseña.
-func (a *App) formularioLogin(w http.ResponseWriter, r *http.Request) {
-	// SinMenu oculta la barra de navegación, porque aún no hay sesión.
-	a.mostrar(w, r, "login", nil, vista{"Titulo": "Entrar", "SinMenu": true})
+// yo es lo primero que pide la interfaz al abrirse: los datos del negocio y la
+// persona con sesión (null si no ha entrado).
+func (a *App) yo(w http.ResponseWriter, r *http.Request) {
+	responder(w, http.StatusOK, map[string]any{
+		"usuario": a.persona(r),
+		"negocio": a.Negocio.Obtener(r.Context()),
+	})
 }
 
-// iniciarSesion recibe el formulario de login y, si es correcto, abre la sesión.
+// iniciarSesion revisa correo y contraseña y, si son correctos, abre la sesión.
 func (a *App) iniciarSesion(w http.ResponseWriter, r *http.Request) {
-	// Revisa correo y contraseña.
-	u, err := a.Usuarios.Autenticar(r.Context(), r.FormValue("correo"), r.FormValue("clave"))
+	var datos struct {
+		Correo string `json:"correo"`
+		Clave  string `json:"clave"`
+	}
+	if !a.leer(w, r, &datos) {
+		return
+	}
+
+	u, err := a.Usuarios.Autenticar(r.Context(), datos.Correo, datos.Clave)
 	if err != nil {
-		// Datos incorrectos: regresa al login con el aviso.
-		a.volver(w, r, "/login", err)
+		a.fallo(w, r, err)
 		return
 	}
 
@@ -46,13 +55,11 @@ func (a *App) iniciarSesion(w http.ResponseWriter, r *http.Request) {
 		// Lax: no se manda en envíos desde otros sitios.
 		SameSite: http.SameSiteLaxMode,
 	})
-	// Redirige a la caja.
-	http.Redirect(w, r, "/caja", http.StatusSeeOther)
+	responder(w, http.StatusOK, u)
 }
 
 // cerrarSesion borra la sesión de la base de datos y la cookie del navegador.
 func (a *App) cerrarSesion(w http.ResponseWriter, r *http.Request, _ *usuario.Usuario) {
-	// Si el navegador trae la cookie, borra esa sesión de la base de datos.
 	if galleta, err := r.Cookie(galletaSesion); err == nil {
 		if err := a.Usuarios.CerrarSesion(r.Context(), galleta.Value); err != nil {
 			// Si falla no se detiene: solo se anota, y la cookie se borra de todos modos.
@@ -62,7 +69,7 @@ func (a *App) cerrarSesion(w http.ResponseWriter, r *http.Request, _ *usuario.Us
 
 	// MaxAge -1 le dice al navegador que borre la cookie.
 	http.SetCookie(w, &http.Cookie{Name: galletaSesion, Path: "/", MaxAge: -1})
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	sinContenido(w)
 }
 
 // esHTTPS también mira el encabezado del proxy: en Coolify el TLS lo termina Traefik.

@@ -56,21 +56,21 @@ var (
 // cada campo dentro de MongoDB.
 type Usuario struct {
 	// Identificador único que MongoDB asigna a cada documento ("omitempty": si está vacío, MongoDB lo genera).
-	ID bson.ObjectID `bson:"_id,omitempty"`
+	ID bson.ObjectID `bson:"_id,omitempty" json:"id"`
 	// Nombre para mostrar.
-	Nombre string `bson:"nombre"`
+	Nombre string `bson:"nombre" json:"nombre"`
 	// Correo (en minúsculas) con el que entra.
-	Correo string `bson:"correo"`
+	Correo string `bson:"correo" json:"correo"`
 	// Siempre el hash, nunca la contraseña.
-	Clave string `bson:"clave"`
+	Clave string `bson:"clave" json:"-"`
 	// "admin" o "cajero".
-	Rol string `bson:"rol"`
+	Rol string `bson:"rol" json:"rol"`
 	// false = cuenta desactivada, ya no puede entrar.
-	Activo bool `bson:"activo"`
+	Activo bool `bson:"activo" json:"activo"`
 	// Contraseñas incorrectas seguidas.
-	Intentos int `bson:"intentos"`
+	Intentos int `bson:"intentos" json:"-"`
 	// Hasta cuándo está bloqueada la cuenta.
-	BloqueadoHasta time.Time `bson:"bloqueado_hasta"`
+	BloqueadoHasta time.Time `bson:"bloqueado_hasta" json:"-"`
 }
 
 // sesion es el registro de "esta persona ya entró". Su identificador es el propio token.

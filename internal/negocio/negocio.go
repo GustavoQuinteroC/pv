@@ -17,9 +17,9 @@ import (
 // Negocio son los dos datos que se pueden cambiar en "Ajustes".
 type Negocio struct {
 	// Nombre del negocio.
-	Nombre string `bson:"nombre"`
+	Nombre string `bson:"nombre" json:"nombre"`
 	// Mensaje al final del ticket.
-	Mensaje string `bson:"mensaje"`
+	Mensaje string `bson:"mensaje" json:"mensaje"`
 }
 
 // Repo guarda el acceso a la colección "ajustes".

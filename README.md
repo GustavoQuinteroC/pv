@@ -21,11 +21,11 @@ Una caja, un negocio, sin inventario y sin facturación: lo necesario para vende
 
 | Pieza | Elección |
 |---|---|
-| Lenguaje | Go (biblioteca estándar: `net/http`, `html/template`, `log/slog`) |
+| Servidor | Go (biblioteca estándar: `net/http`, `log/slog`) con una API JSON |
 | Base de datos | MongoDB con el driver oficial v2 |
-| Pantallas | HTML del servidor y un solo archivo de JavaScript para la caja |
+| Interfaz | React 19 + TypeScript + Tailwind CSS 4, con el diseño de [TailAdmin](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard) (licencia MIT) |
 | Contraseñas | `bcrypt`, con bloqueo tras 5 intentos fallidos |
-| Despliegue | Una imagen Docker de un solo binario (`distroless`) |
+| Despliegue | Una imagen Docker de un solo binario (`distroless`): la interfaz compilada va incrustada en el programa de Go |
 
 ### Decisiones de diseño
 
@@ -55,8 +55,20 @@ internal/
   caja/            turnos, movimientos y corte (con pruebas)
   negocio/         nombre y mensaje del ticket
   semilla/         primer administrador y productos de ejemplo
-  web/             rutas, plantillas y archivos estáticos
+  web/             API JSON y entrega de la interfaz compilada (dist/)
+frontend/          interfaz React (src/paginas = una pantalla por archivo)
 ```
+
+## Desarrollar la interfaz
+
+Necesitas Go, Node 24 y una MongoDB. Se trabaja con dos procesos: el servidor de Go y el de Vite, que recarga la página al guardar y reenvía `/api` a Go.
+
+```bash
+go run ./cmd/pv                        # API en http://localhost:8080 (compila antes la interfaz una vez)
+cd frontend && npm ci && npm run dev   # interfaz en http://localhost:5173
+```
+
+`npm run build` deja la interfaz en `internal/web/dist`, que Go incrusta al compilar.
 
 ## Probarlo en tu equipo
 

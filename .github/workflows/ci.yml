@@ -34,6 +34,16 @@ jobs:
           go-version-file: go.mod
 
       # Falla si algún archivo no está formateado con gofmt.
+      # Instala Node y compila la interfaz React (Go la incrusta, así que debe existir antes de compilar).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Interfaz React (tipos y compilación)
+        run: npm ci && npx tsc && npx vite build
+        working-directory: frontend
+
       - name: Formato
         run: test -z "$(gofmt -l .)"
 

@@ -118,9 +118,9 @@ func (r *Repo) Cancelar(ctx context.Context, id, turnoAbierto bson.ObjectID, mot
 // MasVendido es una fila del reporte: un producto y cuánto dinero dejó.
 type MasVendido struct {
 	// Nombre del producto (MongoDB lo llama "_id" en el resultado agrupado).
-	Nombre string `bson:"_id"`
+	Nombre string `bson:"_id" json:"id"`
 	// Dinero total vendido (centavos).
-	Importe int64 `bson:"importe"`
+	Importe int64 `bson:"importe" json:"importe"`
 }
 
 // MasVendidos agrupa los renglones de las ventas activas por producto.

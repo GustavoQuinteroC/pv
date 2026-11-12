@@ -1,12 +1,13 @@
 // Archivo: reportes.go
-// Qué hace: pantalla de reportes (solo administración). Resume las ventas de un
-// rango de días con totales por forma de pago y productos más vendidos, y puede
-// descargar esas ventas en un archivo CSV para abrir en Excel.
+// Qué hace: reportes de ventas (solo administración). Resume las ventas de un
+// rango de días con totales por forma de pago y productos más vendidos, y
+// puede descargar esas ventas en un archivo CSV para abrir en Excel.
 
 package web
 
 import (
 	"encoding/csv"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -18,39 +19,33 @@ import (
 // formatoFecha es el formato de fecha que usa Go para "año-mes-día" (2026-11-12).
 const formatoFecha = "2006-01-02"
 
-// reportes resume las ventas de un rango de días (hoy, si no se elige otro).
-// Con ?formato=csv descarga las mismas ventas para abrirlas en una hoja de cálculo.
-func (a *App) reportes(w http.ResponseWriter, r *http.Request, u *usuario.Usuario) {
-	// Lee ?desde= y ?hasta= de la URL.
+// ventasDeLaConsulta lee ?desde= y ?hasta= (hoy, si faltan) y trae las ventas de ese rango.
+func (a *App) ventasDeLaConsulta(r *http.Request) ([]venta.Venta, time.Time, time.Time, error) {
 	primerDia := diaDeLaConsulta(r, "desde")
-	ultimoDia := diaDeLaConsulta(r, "hasta")
-	hasta := ultimoDia.AddDate(0, 0, 1) // el rango excluye el límite, así que se suma un día
+	hasta := diaDeLaConsulta(r, "hasta").AddDate(0, 0, 1) // el rango excluye el límite, así que se suma un día
 
 	ventas, err := a.Ventas.Entre(r.Context(), primerDia, hasta)
+	return ventas, primerDia, hasta, err
+}
+
+// reportes devuelve el resumen, lo más vendido y las ventas del rango.
+func (a *App) reportes(w http.ResponseWriter, r *http.Request, _ *usuario.Usuario) {
+	ventas, desde, hasta, err := a.ventasDeLaConsulta(r)
 	if err != nil {
 		a.fallo(w, r, err)
 		return
 	}
 
-	// Si piden CSV, se descarga el archivo y no se pinta la pantalla.
-	if r.URL.Query().Get("formato") == "csv" {
-		a.descargarCSV(w, r, ventas)
-		return
-	}
-
-	masVendidos, err := a.Ventas.MasVendidos(r.Context(), primerDia, hasta)
+	masVendidos, err := a.Ventas.MasVendidos(r.Context(), desde, hasta)
 	if err != nil {
 		a.fallo(w, r, err)
 		return
 	}
 
-	a.mostrar(w, r, "reportes", u, vista{
-		"Titulo":      "Reportes",
-		"Desde":       primerDia.Format(formatoFecha),
-		"Hasta":       ultimoDia.Format(formatoFecha),
-		"Resumen":     venta.Resumir(ventas),
-		"MasVendidos": masVendidos,
-		"Ventas":      ventas,
+	responder(w, http.StatusOK, map[string]any{
+		"resumen":     venta.Resumir(ventas),
+		"masVendidos": masVendidos,
+		"ventas":      ventas,
 	})
 }
 
@@ -65,27 +60,29 @@ func diaDeLaConsulta(r *http.Request, nombre string) time.Time {
 	return dia
 }
 
-// descargarCSV envía las ventas como archivo ventas.csv.
-func (a *App) descargarCSV(w http.ResponseWriter, r *http.Request, ventas []venta.Venta) {
+// descargarCSV envía las ventas del rango como archivo ventas.csv.
+func (a *App) descargarCSV(w http.ResponseWriter, r *http.Request, _ *usuario.Usuario) {
+	ventas, _, _, err := a.ventasDeLaConsulta(r)
+	if err != nil {
+		a.fallo(w, r, err)
+		return
+	}
+
 	// Encabezados que hacen que el navegador descargue el archivo en vez de mostrarlo.
 	w.Header().Set("Content-Type", "text/csv; charset=utf-8")
 	w.Header().Set("Content-Disposition", `attachment; filename="ventas.csv"`)
 	w.Write([]byte("\xEF\xBB\xBF")) // marca para que Excel respete los acentos
 
-	// El escritor de CSV se ocupa de comas y comillas.
 	salida := csv.NewWriter(w)
-	// Primera fila: títulos de las columnas.
 	salida.Write([]string{"Folio", "Fecha", "Cajero", "Total", "Estado"})
-	// Una fila por venta.
 	for _, v := range ventas {
 		salida.Write([]string{
 			strconv.FormatInt(v.Folio, 10),
 			v.Fecha.Local().Format("2006-01-02 15:04"),
 			v.CajeroNombre,
-			decimal(v.Total),
+			fmt.Sprintf("%d.%02d", v.Total/100, v.Total%100),
 			v.Estado,
 		})
 	}
-	// Vacía lo pendiente hacia el navegador.
 	salida.Flush()
 }

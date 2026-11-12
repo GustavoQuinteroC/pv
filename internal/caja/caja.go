@@ -40,23 +40,23 @@ var (
 // Turno es el periodo en que una persona atiende la caja.
 type Turno struct {
 	// Identificador único.
-	ID bson.ObjectID `bson:"_id,omitempty"`
+	ID bson.ObjectID `bson:"_id,omitempty" json:"id"`
 	// Quién abrió el turno (id).
-	Cajero bson.ObjectID `bson:"cajero"`
+	Cajero bson.ObjectID `bson:"cajero" json:"cajero"`
 	// Quién abrió el turno (nombre).
-	CajeroNombre string `bson:"cajero_nombre"`
+	CajeroNombre string `bson:"cajero_nombre" json:"cajero_nombre"`
 	// Efectivo con el que empezó la caja (centavos).
-	Fondo int64 `bson:"fondo"`
+	Fondo int64 `bson:"fondo" json:"fondo"`
 	// "abierto" o "cerrado".
-	Estado string `bson:"estado"`
+	Estado string `bson:"estado" json:"estado"`
 	// Cuándo se abrió.
-	Abierto time.Time `bson:"abierto"`
+	Abierto time.Time `bson:"abierto" json:"abierto"`
 	// Cuándo se cerró.
-	Cerrado time.Time `bson:"cerrado"`
+	Cerrado time.Time `bson:"cerrado" json:"cerrado"`
 	// Efectivo que la persona contó al cerrar (centavos).
-	Contado int64 `bson:"contado"`
+	Contado int64 `bson:"contado" json:"contado"`
 	// Efectivo que el sistema calculó que debía haber (centavos).
-	Esperado int64 `bson:"esperado"`
+	Esperado int64 `bson:"esperado" json:"esperado"`
 }
 
 // Diferencia es lo que sobra (positivo) o falta (negativo) en el cajón.
@@ -67,17 +67,17 @@ func (t Turno) Diferencia() int64 {
 // Movimiento es una entrada o retiro de efectivo del cajón (no es una venta).
 type Movimiento struct {
 	// Identificador único.
-	ID bson.ObjectID `bson:"_id,omitempty"`
+	ID bson.ObjectID `bson:"_id,omitempty" json:"id"`
 	// A qué turno pertenece.
-	Turno bson.ObjectID `bson:"turno"`
+	Turno bson.ObjectID `bson:"turno" json:"turno"`
 	// "entrada" o "retiro".
-	Tipo string `bson:"tipo"`
+	Tipo string `bson:"tipo" json:"tipo"`
 	// Cuánto dinero (centavos).
-	Monto int64 `bson:"monto"`
+	Monto int64 `bson:"monto" json:"monto"`
 	// Para qué fue.
-	Motivo string `bson:"motivo"`
+	Motivo string `bson:"motivo" json:"motivo"`
 	// Cuándo se registró.
-	Fecha time.Time `bson:"fecha"`
+	Fecha time.Time `bson:"fecha" json:"fecha"`
 }
 
 // Esperado es el efectivo que debe haber en el cajón al cerrar el turno:
