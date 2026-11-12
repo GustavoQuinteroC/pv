@@ -1,0 +1,26 @@
+services:
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USUARIO}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_CLAVE}
+    volumes:
+      - mongo-datos:/data/db
+
+  pv:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URI: mongodb://${MONGO_USUARIO}:${MONGO_CLAVE}@mongo:27017/?authSource=admin
+      MONGO_BD: pv
+      ADMIN_CORREO: ${ADMIN_CORREO}
+      ADMIN_CLAVE: ${ADMIN_CLAVE}
+      SEMBRAR_DEMO: ${SEMBRAR_DEMO:-false}
+    ports:
+      - "8080:8080"
+
+volumes:
+  mongo-datos:

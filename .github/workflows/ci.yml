@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:8
+        ports:
+          - 27017:27017
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Formato
+        run: test -z "$(gofmt -l .)"
+
+      - name: Análisis estático
+        run: go vet ./...
+
+      - name: Pruebas (unitarias y con MongoDB)
+        run: go test -race ./...
+        env:
+          MONGO_URI_PRUEBAS: mongodb://localhost:27017
+
+      - name: Vulnerabilidades conocidas
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  secretos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
