@@ -1,26 +1,44 @@
+# Archivo: docker-compose.yml
+# Qué hace: levanta todo el sistema con un solo comando (docker compose up):
+# la base de datos MongoDB y la aplicación. Los valores entre ${...} se
+# leen del archivo .env (copia .env.example y cámbialo).
+
 services:
+  # Base de datos.
   mongo:
     image: mongo:8
+    # Se reinicia sola, salvo que se detenga a propósito.
     restart: unless-stopped
     environment:
+      # Usuario y contraseña del administrador de MongoDB.
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USUARIO}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_CLAVE}
     volumes:
+      # Guarda los datos en un volumen para que no se pierdan al reiniciar.
       - mongo-datos:/data/db
 
+  # La aplicación (el punto de venta).
   pv:
+    # Construye la imagen con el Dockerfile de esta carpeta.
     build: .
     restart: unless-stopped
+    # Arranca después de mongo.
     depends_on:
       - mongo
     environment:
+      # Dirección de MongoDB (el nombre "mongo" es el del servicio de arriba).
       MONGO_URI: mongodb://${MONGO_USUARIO}:${MONGO_CLAVE}@mongo:27017/?authSource=admin
+      # Nombre de la base de datos.
       MONGO_BD: pv
+      # Cuenta del primer administrador.
       ADMIN_CORREO: ${ADMIN_CORREO}
       ADMIN_CLAVE: ${ADMIN_CLAVE}
+      # true = crea productos de ejemplo al iniciar. Por defecto, false.
       SEMBRAR_DEMO: ${SEMBRAR_DEMO:-false}
     ports:
+      # Publica el puerto 8080 de la aplicación en el 8080 de la máquina.
       - "8080:8080"
 
+# Volúmenes con nombre (almacenamiento que persiste).
 volumes:
   mongo-datos:

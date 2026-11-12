@@ -1,3 +1,6 @@
+// Archivo: caja_test.go
+// Qué hace: pruebas automáticas del corte de caja. No necesitan base de datos.
+
 package caja
 
 import (
@@ -6,6 +9,7 @@ import (
 	"github.com/GustavoQuinteroC/pv/internal/venta"
 )
 
+// Prueba el cálculo del efectivo esperado en el cajón.
 func TestEsperado(t *testing.T) {
 	ventas := []venta.Venta{
 		// Cobró $50 en efectivo por una venta de $45: el cajón se quedó con $45.
@@ -16,7 +20,9 @@ func TestEsperado(t *testing.T) {
 		{Estado: venta.Cancelada, Total: 2000, Pagos: []venta.Pago{{Forma: venta.Efectivo, Monto: 2000}}},
 	}
 	movimientos := []Movimiento{
+		// Entraron $10 al cajón.
 		{Tipo: Entrada, Monto: 1000},
+		// Salieron $30.
 		{Tipo: Retiro, Monto: 3000},
 	}
 
@@ -27,6 +33,7 @@ func TestEsperado(t *testing.T) {
 	}
 }
 
+// Prueba la diferencia entre lo contado y lo esperado: cuadra, sobra o falta.
 func TestDiferencia(t *testing.T) {
 	casos := []struct {
 		nombre   string

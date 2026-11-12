@@ -1,3 +1,7 @@
+// Archivo: formato_test.go
+// Qué hace: pruebas automáticas de las funciones de formato (pesos, cantidades
+// y lectura de montos escritos por una persona).
+
 package web
 
 import (
@@ -5,7 +9,9 @@ import (
 	"testing"
 )
 
+// Prueba que los centavos se muestren como pesos con comas y signo.
 func TestPesos(t *testing.T) {
+	// Mapa: entrada (centavos) → texto esperado.
 	casos := map[int64]string{
 		0:       "$0.00",
 		5:       "$0.05",
@@ -22,6 +28,7 @@ func TestPesos(t *testing.T) {
 	}
 }
 
+// Prueba que las milésimas se muestren sin ceros sobrantes (y las piezas sin decimales).
 func TestCantidad(t *testing.T) {
 	casos := []struct {
 		milesimas int64
@@ -42,7 +49,9 @@ func TestCantidad(t *testing.T) {
 	}
 }
 
+// Prueba la lectura de montos: los válidos dan centavos y los inválidos dan ErrMonto.
 func TestACentavos(t *testing.T) {
+	// Textos válidos y los centavos que deben dar.
 	validos := map[string]int64{
 		"":          0,
 		"12":        1200,
@@ -59,6 +68,7 @@ func TestACentavos(t *testing.T) {
 		}
 	}
 
+	// Textos que deben rechazarse: negativos, letras, demasiados decimales, notación científica, muy grandes.
 	for _, texto := range []string{"-5", "abc", "1.234", "NaN", "Inf", "1e5", "10000000000"} {
 		if _, err := aCentavos(texto); !errors.Is(err, ErrMonto) {
 			t.Errorf("aCentavos(%q) debía rechazarse con ErrMonto, dio %v", texto, err)

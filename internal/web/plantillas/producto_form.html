@@ -1,21 +1,31 @@
+{{/*
+  Archivo: producto_form.html
+  Qué hace: Formulario para crear o editar un producto (solo administración).
+*/}}
 {{define "contenido"}}
+{{/* Sin id = producto nuevo; con id = edición. */}}
 <h1>{{if .Producto.ID.IsZero}}Nuevo producto{{else}}Editar producto{{end}}</h1>
 
+{{/* Se envía a /productos (crear) o /productos/<id> (editar). */}}
 <form method="post" action="{{.Accion}}" class="formulario tarjeta">
   <label>Nombre
     <input name="nombre" value="{{.Producto.Nombre}}" required autofocus>
   </label>
 
+  {{/* Código para el lector de la caja. */}}
   <label>Código de barras (opcional)
     <input name="codigo" value="{{.Producto.Codigo}}" inputmode="numeric">
   </label>
 
+  {{/* El precio se muestra en pesos (ej. 12.50). */}}
   <label>Precio por unidad
     <input name="precio" value="{{if .Producto.Precio}}{{decimal .Producto.Precio}}{{end}}" inputmode="decimal" required>
   </label>
 
+  {{/* Unidad: pieza, kg o litro. */}}
   <label>Se vende por
     <select name="unidad">
+      {{/* Una opción por cada unidad; marca la que ya tiene el producto. */}}
       {{range .Unidades}}
       <option value="{{.}}" {{if eq . $.Producto.Unidad}}selected{{end}}>{{.}}</option>
       {{end}}
@@ -23,11 +33,13 @@
   </label>
 
   <label class="casilla">
+    {{/* Casilla: favorito. */}}
     <input type="checkbox" name="favorito" {{if .Producto.Favorito}}checked{{end}}>
     Mostrar entre los favoritos de la caja
   </label>
 
   <label class="casilla">
+    {{/* Casilla: activo. */}}
     <input type="checkbox" name="activo" {{if .Producto.Activo}}checked{{end}}>
     Activo (si se desmarca, ya no se puede vender)
   </label>

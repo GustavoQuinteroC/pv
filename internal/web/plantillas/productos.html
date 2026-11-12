@@ -1,6 +1,11 @@
+{{/*
+  Archivo: productos.html
+  Qué hace: Lista de productos (solo administración) con enlace para crear y editar.
+*/}}
 {{define "contenido"}}
 <div class="fila">
   <h1>Productos</h1>
+  {{/* Lleva al formulario de producto nuevo. */}}
   <a class="boton primario" href="/productos/nuevo">Nuevo producto</a>
 </div>
 
@@ -16,14 +21,18 @@
       </tr>
     </thead>
     <tbody>
+      {{/* Una fila por cada producto. */}}
       {{range .Productos}}
       <tr>
+        {{/* Nombre, con estrella si es favorito. */}}
         <td>{{.Nombre}}{{if .Favorito}} ★{{end}}</td>
         <td>{{.Codigo}}</td>
+        {{/* Precio con formato de pesos. */}}
         <td class="dinero">{{pesos .Precio}} / {{.Unidad}}</td>
         <td>{{if .Activo}}Activo{{else}}<span class="suave">Inactivo</span>{{end}}</td>
         <td><a href="/productos/{{.ID.Hex}}">Editar</a></td>
       </tr>
+      {{/* Si no hay productos, se muestra este mensaje. */}}
       {{else}}
       <tr><td colspan="5" class="suave">Todavía no hay productos.</td></tr>
       {{end}}

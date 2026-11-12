@@ -1,22 +1,31 @@
+{{/*
+  Archivo: reportes.html
+  Qué hace: Reportes (solo administración): ventas de un rango de fechas, totales por forma de pago, productos más vendidos y descarga CSV.
+*/}}
 {{define "contenido"}}
 <h1>Reportes</h1>
 
+{{/* Filtro de fechas (se envía por URL). */}}
 <form method="get" action="/reportes" class="fila">
   <label>Desde <input type="date" name="desde" value="{{.Desde}}"></label>
   <label>Hasta <input type="date" name="hasta" value="{{.Hasta}}"></label>
   <button class="primario">Ver</button>
+  {{/* Pide el mismo reporte como archivo CSV. */}}
   <button name="formato" value="csv">Descargar CSV</button>
 </form>
 
+{{/* Cifras grandes del resumen. */}}
 <div class="cifras tarjeta">
   <div><span class="suave">Ventas</span><strong>{{.Resumen.Cantidad}}</strong></div>
   <div><span class="suave">Total</span><strong>{{pesos .Resumen.Total}}</strong></div>
+  {{/* Una cifra por forma de pago. */}}
   {{range $forma, $monto := .Resumen.PorForma}}
   <div><span class="suave">{{$forma}}</span><strong>{{pesos $monto}}</strong></div>
   {{end}}
 </div>
 
 <section class="tarjeta">
+  {{/* Productos con más importe vendido. */}}
   <h2>Lo más vendido</h2>
   <div class="tabla-contenedor">
     <table>
@@ -32,6 +41,7 @@
 </section>
 
 <section class="tarjeta">
+  {{/* Lista de ventas del rango. */}}
   <h2>Ventas</h2>
   <div class="tabla-contenedor">
     <table>
@@ -47,6 +57,7 @@
       <tbody>
         {{range .Ventas}}
         <tr>
+          {{/* El folio abre el ticket. */}}
           <td><a href="/ventas/{{.ID.Hex}}">{{.Folio}}</a></td>
           <td>{{fecha .Fecha}}</td>
           <td>{{.CajeroNombre}}</td>

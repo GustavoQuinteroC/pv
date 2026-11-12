@@ -1,4 +1,9 @@
+{{/*
+  Archivo: turno_abrir.html
+  Qué hace: Pantalla cuando no hay turno propio: muestra quién tiene la caja, o el formulario para abrir turno con el fondo de caja.
+*/}}
 {{define "contenido"}}
+{{/* Hay un turno abierto de otra persona. */}}
 {{if .Turno}}
 <section class="tarjeta">
   <h1>La caja está en uso</h1>
@@ -6,7 +11,9 @@
   <p class="suave">Solo se puede vender desde el turno propio. Hasta que esa persona cierre, no se abre otro.</p>
   <a class="boton" href="/turno">Ver el turno</a>
 </section>
+{{/* No hay turno abierto: se puede abrir uno. */}}
 {{else}}
+{{/* Abre el turno con el fondo capturado. */}}
 <form method="post" action="/turno/abrir" class="formulario tarjeta">
   <h1>Abrir turno</h1>
   <p class="suave">Cuenta el efectivo con el que empieza la caja.</p>

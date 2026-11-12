@@ -1,14 +1,24 @@
+# Archivo: ci.yml
+# Qué hace: integración continua. Cada vez que se sube código a GitHub corre
+# solas las revisiones: formato, análisis estático, pruebas (con MongoDB real),
+# vulnerabilidades conocidas y búsqueda de secretos filtrados.
+
+# Nombre que aparece en GitHub.
 name: CI
 
+# Cuándo corre: al subir a main y en cada pull request.
 on:
   push:
     branches: [main]
   pull_request:
 
+# Dos trabajos independientes.
 jobs:
+  # Trabajo 1: calidad del código.
   pruebas:
     runs-on: ubuntu-latest
 
+    # Contenedor auxiliar: una MongoDB desechable para las pruebas.
     services:
       mongo:
         image: mongo:8
@@ -16,30 +26,38 @@ jobs:
           - 27017:27017
 
     steps:
+      # Descarga el código.
       - uses: actions/checkout@v4
+      # Instala la versión de Go que pide go.mod.
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
+      # Falla si algún archivo no está formateado con gofmt.
       - name: Formato
         run: test -z "$(gofmt -l .)"
 
+      # Busca errores comunes sin ejecutar el programa.
       - name: Análisis estático
         run: go vet ./...
 
+      # Corre todas las pruebas; -race detecta accesos simultáneos peligrosos.
       - name: Pruebas (unitarias y con MongoDB)
         run: go test -race ./...
         env:
           MONGO_URI_PRUEBAS: mongodb://localhost:27017
 
+      # Revisa si las dependencias tienen fallos de seguridad conocidos.
       - name: Vulnerabilidades conocidas
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
+  # Trabajo 2: que no se hayan subido contraseñas ni llaves.
   secretos:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          # Descarga todo el historial, para revisar también los commits viejos.
           fetch-depth: 0
       - uses: gitleaks/gitleaks-action@v2
         env:

@@ -1,13 +1,20 @@
+{{/*
+  Archivo: usuarios.html
+  Qué hace: Administración de usuarios: alta de cuentas y activar o desactivar.
+*/}}
 {{define "contenido"}}
 <h1>Usuarios</h1>
 
+{{/* Formulario de alta. */}}
 <form method="post" action="/usuarios" class="tarjeta fila">
   <label>Nombre <input name="nombre" required></label>
   <label>Correo <input type="email" name="correo" required></label>
   <label>Contraseña (mínimo 8 caracteres)
+    {{/* Mínimo 8 caracteres. */}}
     <input type="password" name="clave" minlength="8" autocomplete="new-password" required>
   </label>
   <label>Rol
+    {{/* Cajero o administrador. */}}
     <select name="rol">
       <option value="cajero">Cajero</option>
       <option value="admin">Administrador</option>
@@ -22,6 +29,7 @@
       <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr>
     </thead>
     <tbody>
+      {{/* Una fila por usuario. */}}
       {{range .Usuarios}}
       <tr>
         <td>{{.Nombre}}</td>
@@ -29,6 +37,7 @@
         <td>{{.Rol}}</td>
         <td>{{if .Activo}}Activo{{else}}<span class="suave">Inactivo</span>{{end}}</td>
         <td>
+          {{/* Si está activo, el botón desactiva; si no, activa. */}}
           {{if .Activo}}
           <form method="post" action="/usuarios/{{.ID.Hex}}/activo">
             <input type="hidden" name="activo" value="false">

@@ -1,15 +1,23 @@
+{{/*
+  Archivo: ajustes.html
+  Qué hace: Pantalla de ajustes (solo administración): cambia el nombre del negocio y el mensaje al final del ticket.
+*/}}
 {{define "contenido"}}
 <h1>Ajustes</h1>
 
+{{/* Formulario que se envía por POST a /ajustes. */}}
 <form method="post" action="/ajustes" class="formulario tarjeta">
+  {{/* Campo obligatorio, ya trae el nombre actual. */}}
   <label>Nombre del negocio
     <input name="nombre" value="{{.Negocio.Nombre}}" required>
   </label>
 
+  {{/* Mensaje opcional; también viene con el valor actual. */}}
   <label>Mensaje al final del ticket
     <input name="mensaje" value="{{.Negocio.Mensaje}}">
   </label>
 
+  {{/* Envía el formulario. */}}
   <button class="primario">Guardar</button>
 </form>
 {{end}}

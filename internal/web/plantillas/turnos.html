@@ -1,3 +1,7 @@
+{{/*
+  Archivo: turnos.html
+  Qué hace: Lista de cortes de caja (solo administración).
+*/}}
 {{define "contenido"}}
 <h1>Cortes de caja</h1>
 
@@ -13,12 +17,15 @@
       </tr>
     </thead>
     <tbody>
+      {{/* Una fila por turno. */}}
       {{range .Turnos}}
       <tr>
         <td>{{fecha .Abierto}}</td>
         <td>{{.CajeroNombre}}</td>
         <td>{{.Estado}}</td>
+        {{/* La diferencia solo existe cuando el turno está cerrado. */}}
         <td class="dinero">{{if eq .Estado "cerrado"}}{{pesos .Diferencia}}{{end}}</td>
+        {{/* Abre el detalle del corte. */}}
         <td><a href="/turnos/{{.ID.Hex}}">Ver</a></td>
       </tr>
       {{else}}
